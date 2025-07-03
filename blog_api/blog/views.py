@@ -3,6 +3,9 @@ from .models import Comment,Post
 from .serializers import CommentSerializer,PostSerializer
 from rest_framework import viewsets,permissions
 
+def blog_frontend_view(request):
+    return render(request, 'blog/blog_frontend.html')
+
 class CommentViewSet(viewsets.ModelViewSet):
     queryset=Comment.objects.all()
     serializer_class=CommentSerializer

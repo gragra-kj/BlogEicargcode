@@ -19,5 +19,7 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/blog/',include('blog.route'))
+    path('api/blog/',include('blog.route')),
+    path('blog/', include('blog.route')),
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]

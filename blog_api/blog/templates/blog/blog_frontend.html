@@ -1,0 +1,333 @@
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My Blog API Frontend</title>
+    <style>
+      body {
+        font-family: Arial;
+        margin: 20px;
+      }
+      .post {
+        margin-bottom: 30px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      .comment-form {
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📚 Blog Posts</h1>
+    <div id="postContainer"></div>
+
+    <script>
+      const apiBase = "http://127.0.0.1:8000/api/blog";
+      const token = "RgR7tFd4707fLpQOn74aa9xNKKSS3i";
+
+      // Fetch blog posts
+      fetch(`${apiBase}/posts/`)
+        .then((response) => response.json())
+        .then((posts) => {
+          const container = document.getElementById("postContainer");
+
+          posts.forEach((post) => {
+            const div = document.createElement("div");
+            div.className = "post";
+
+            div.innerHTML = `
+            <h3>${post.title}</h3>
+            <p>${post.body}</p>
+            <form class="comment-form" data-post-id="${post.id}">
+              <input type="text" name="comment" placeholder="Write a comment" required />
+              <button type="submit">Submit Comment</button>
+              <div class="result" style="margin-top: 5px; font-size: 0.9em;"></div>
+            </form>
+          `;
+
+            container.appendChild(div);
+          });
+
+          // Attach event listeners to each form
+          document.querySelectorAll(".comment-form").forEach((form) => {
+            form.addEventListener("submit", (e) => {
+              e.preventDefault();
+
+              const postId = form.getAttribute("data-post-id");
+              const commentInput = form.querySelector("input[name='comment']");
+              const resultDiv = form.querySelector(".result");
+
+              fetch(`${apiBase}/comments/`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Token ${token}`,
+                },
+                body: JSON.stringify({
+                  post: postId,
+                  content: commentInput.value,
+                }),
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  resultDiv.innerText = "✅ Comment posted!";
+                  commentInput.value = "";
+                })
+                .catch((err) => {
+                  resultDiv.innerText = "❌ Failed to post comment.";
+                });
+            });
+          });
+        })
+        .catch((error) => {
+          console.error("Error loading posts:", error);
+          document.getElementById("postContainer").innerText =
+            "Failed to load posts.";
+        });
+    </script>
+  </body>
+</html>
+{% endcomment %}
+{% comment %} <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My Blog API Frontend</title>
+    <style>
+      body {
+        font-family: Arial;
+        margin: 20px;
+      }
+      .post {
+        margin-bottom: 30px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      .comment-form {
+        margin-top: 10px;
+      }
+      .comment-form input,
+      .comment-form button {
+        padding: 8px;
+        margin-top: 5px;
+      }
+      .result {
+        margin-top: 5px;
+        font-size: 0.9em;
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📚 Blog Posts</h1>
+    <div id="postContainer">Loading posts...</div>
+
+    <script>
+      const apiBase = "http://127.0.0.1:8000/api/blog";
+      const token = "UkFmMRJspm8W45vvk3tkW1dNJu84k5"; // Replace with your OAuth2 access token
+
+      // Fetch blog posts
+      fetch(`${apiBase}/posts/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((posts) => {
+          const container = document.getElementById("postContainer");
+          container.innerHTML = "";
+
+          posts.forEach((post) => {
+            const div = document.createElement("div");
+            div.className = "post";
+
+            div.innerHTML = `
+          <h3>${post.title}</h3>
+          <p>${post.body}</p>
+          <div class="comments">
+    ${
+      post.comments.length > 0
+        ? post.comments.map((c) => `<p>💬 ${c.content}</p>`).join("")
+        : "<p>No comments yet.</p>"
+    }
+  </div>
+
+          <form class="comment-form" data-post-id="${post.id}">
+            <input type="text" name="comment" placeholder="Write a comment" required />
+            <button type="submit">Submit Comment</button>
+            <div class="result"></div>
+          </form>
+        `;
+
+            container.appendChild(div);
+          });
+
+          // Attach form event listeners
+          document.querySelectorAll(".comment-form").forEach((form) => {
+            form.addEventListener("submit", (e) => {
+              e.preventDefault();
+
+              const postId = form.getAttribute("data-post-id");
+              const commentInput = form.querySelector("input[name='comment']");
+              const resultDiv = form.querySelector(".result");
+
+              fetch(`${apiBase}/comments/`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  post: postId,
+                  content: commentInput.value,
+                }),
+              })
+                .then((response) => {
+                  if (!response.ok) {
+                    throw new Error("Failed to post comment");
+                  }
+                  return response.json();
+                })
+                .then((data) => {
+                  resultDiv.innerText = "✅ Comment posted!";
+                  resultDiv.style.color = "green";
+                  commentInput.value = "";
+                })
+                .catch((err) => {
+                  resultDiv.innerText = "❌ Failed to post comment.";
+                  resultDiv.style.color = "red";
+                });
+            });
+          });
+        })
+        .catch((error) => {
+          document.getElementById("postContainer").innerText =
+            "❌ Failed to load posts.";
+          console.error("Error:", error);
+        });
+    </script>
+  </body>
+</html> {% endcomment %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Blog API Frontend</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    .post { margin-bottom: 30px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+    .comment-form { margin-top: 10px; }
+    .comment-form input, .comment-form button {
+      padding: 8px;
+      margin-top: 5px;
+    }
+    .result {
+      margin-top: 5px;
+      font-size: 0.9em;
+      color: green;
+    }
+    .comments {
+      margin-top: 10px;
+      margin-left: 10px;
+    }
+    .comments p {
+      margin: 3px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📚 Blog Posts</h1>
+  <div id="postContainer">Loading posts...</div>
+
+  <script>
+    const apiBase = "http://127.0.0.1:8000/api/blog";
+    const token = "UkFmMRJspm8W45vvk3tkW1dNJu84k5"; // Replace with your valid OAuth2 token
+
+    // Fetch blog posts
+    fetch(`${apiBase}/posts/`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+    .then(response => response.json())
+    .then(posts => {
+      const container = document.getElementById("postContainer");
+      container.innerHTML = "";
+
+      posts.forEach(post => {
+        const div = document.createElement("div");
+        div.className = "post";
+
+        div.innerHTML = `
+          <h3>${post.title}</h3>
+          <p>${post.body}</p>
+
+          <div class="comments">
+            ${post.comments.map(c => `<p>💬 ${c.content}</p>`).join("")}
+          </div>
+
+          <form class="comment-form" data-post-id="${post.id}">
+            <input type="text" name="comment" placeholder="Write a comment" required />
+            <button type="submit">Submit Comment</button>
+            <div class="result"></div>
+          </form>
+        `;
+
+        container.appendChild(div);
+      });
+
+      // Attach form event listeners
+      document.querySelectorAll(".comment-form").forEach(form => {
+        form.addEventListener("submit", e => {
+          e.preventDefault();
+
+          const postId = form.getAttribute("data-post-id");
+          const commentInput = form.querySelector("input[name='comment']");
+          const resultDiv = form.querySelector(".result");
+
+          fetch(`${apiBase}/comments/`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              post: postId,
+              content: commentInput.value
+            })
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error("Failed to post comment");
+            }
+            return response.json();
+          })
+          .then(data => {
+            resultDiv.innerText = "✅ Comment posted!";
+            resultDiv.style.color = "green";
+
+            // Immediately show the comment
+            const commentsDiv = form.parentElement.querySelector(".comments");
+            commentsDiv.innerHTML += `<p>💬 ${commentInput.value}</p>`;
+            commentInput.value = "";
+          })
+          .catch(err => {
+            resultDiv.innerText = "❌ Failed to post comment.";
+            resultDiv.style.color = "red";
+          });
+        });
+      });
+
+    })
+    .catch(error => {
+      document.getElementById("postContainer").innerText = "❌ Failed to load posts.";
+      console.error("Error:", error);
+    });
+  </script>
+
+</body>
+</html>
